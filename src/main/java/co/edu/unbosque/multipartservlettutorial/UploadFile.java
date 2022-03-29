@@ -1,44 +1,45 @@
 package co.edu.unbosque.multipartservlettutorial;
 
 import java.io.*;
-import javax.servlet.ServletException;
-import javax.servlet.http.*;
-import javax.servlet.annotation.*;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.*;
+import jakarta.servlet.annotation.*;
 
-@WebServlet(name = "multiPartServlet", value = "/multiPartServlet")
+@WebServlet(name = "uploadFile", value = "/upload-file")
 @MultipartConfig(fileSizeThreshold = 1024 * 1024,
         maxFileSize = 1024 * 1024 * 5,
         maxRequestSize = 1024 * 1024 * 5 * 5)
-public class MultipartServlet extends HttpServlet {
-    private String message;
+public class UploadFile extends HttpServlet {
     private String UPLOAD_DIRECTORY = "uploads";
 
-    public void init() {
-        message = "Hello World!";
-    }
+    public void init() {}
 
     public void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        response.setContentType("text/html");
 
+        // Extracting parameters other than uploaded file
         System.out.println("Name: " + request.getParameter("name"));
 
+        // Getting an instance of the upload path
         String uploadPath = getServletContext().getRealPath("") + File.separator + UPLOAD_DIRECTORY;
         File uploadDir = new File(uploadPath);
+
+        // If path doesn`t exist, create it
         if (!uploadDir.exists()) uploadDir.mkdir();
 
-        String fileName = "";
         try {
+            // Getting each part from the request
             for (Part part : request.getParts()) {
-                fileName = part.getSubmittedFileName();
+                // Storing the file using the same name
+                String fileName = part.getSubmittedFileName();
                 part.write(uploadPath + File.separator + fileName);
             }
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
 
-        response.sendRedirect(request.getContextPath() + "/result.html");
+        // Redirecting
+        response.sendRedirect("./result.html");
     }
 
-    public void destroy() {
-    }
+    public void destroy() {}
 }
